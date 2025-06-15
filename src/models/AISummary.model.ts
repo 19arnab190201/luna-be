@@ -11,6 +11,7 @@ export interface IAISummary extends Document {
   generatedAt: Date;
   version: number;
   qrCode?: string;
+  cloudinaryUrl?: string;
 }
 
 const aiSummarySchema = new Schema<IAISummary>(
@@ -61,6 +62,9 @@ const aiSummarySchema = new Schema<IAISummary>(
       default: 1,
     },
     qrCode: {
+      type: String,
+    },
+    cloudinaryUrl: {
       type: String,
     },
   },

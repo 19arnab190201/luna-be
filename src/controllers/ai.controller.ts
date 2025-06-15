@@ -7,6 +7,13 @@ import { User } from "../models/User.model";
 import axios from "axios";
 import { v2 as cloudinary } from "cloudinary";
 
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
 // Initialize Gemini
 const genAI = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || "",
