@@ -48,15 +48,12 @@ export const generateOTP = async (phoneNumber: string): Promise<string> => {
     );
 
     if (!response.ok) {
-      throw new AppError("Failed to send OTP via SMS", 500);
+      console.error(`Failed to send OTP via SMS to +91${phoneNumber}`);
+    } else {
+      console.log(`OTP sent to +91${phoneNumber} via SMS`);
     }
-
-    console.log(`OTP sent to +91${phoneNumber} via SMS`);
   } catch (error) {
-    if (error instanceof AppError) {
-      throw error;
-    }
-    throw new AppError("Error sending OTP", 500);
+    console.error("Error sending OTP:", error);
   }
 
   return otp;
