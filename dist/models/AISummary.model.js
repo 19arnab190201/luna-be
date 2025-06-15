@@ -84,6 +84,9 @@ const aiSummarySchema = new mongoose_1.Schema({
     qrCode: {
         type: String,
     },
+    cloudinaryUrl: {
+        type: String,
+    },
 }, {
     timestamps: true,
     toJSON: {

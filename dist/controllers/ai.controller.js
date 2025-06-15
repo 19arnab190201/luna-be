@@ -6,6 +6,12 @@ const AISummary_model_1 = require("../models/AISummary.model");
 const error_handler_middleware_1 = require("../middleware/error-handler.middleware");
 const User_model_1 = require("../models/User.model");
 const cloudinary_1 = require("cloudinary");
+// Configure Cloudinary
+cloudinary_1.v2.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 // Initialize Gemini
 const genAI = new genai_1.GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY || "",
