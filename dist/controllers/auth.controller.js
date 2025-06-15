@@ -51,7 +51,7 @@ class AuthController {
                     gender,
                 });
                 // Generate and send OTP
-                const otp = await (0, otp_service_1.generateOTP)(phoneNumber);
+                // const otp = await generateOTP(phoneNumber);
                 res.status(201).json({
                     status: "success",
                     message: "User registered successfully. Please verify your phone number.",
@@ -80,7 +80,7 @@ class AuthController {
                     throw new error_handler_middleware_1.AppError("No user found with this phone number", 404);
                 }
                 // Generate and send OTP
-                const otp = await (0, otp_service_1.generateOTP)(phoneNumber);
+                // const otp = await generateOTP(phoneNumber);
                 res.status(200).json({
                     status: "success",
                     message: "OTP sent successfully",

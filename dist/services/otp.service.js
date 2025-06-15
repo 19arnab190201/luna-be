@@ -2,7 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.verifyOTP = exports.generateOTP = void 0;
 const OTPSession_model_1 = require("../models/OTPSession.model");
-const error_handler_middleware_1 = require("../middleware/error-handler.middleware");
 // Generate a random 5-digit OTP
 const generateRandomOTP = () => {
     return Math.floor(10000 + Math.random() * 90000).toString();
@@ -36,15 +35,14 @@ const generateOTP = async (phoneNumber) => {
         };
         const response = await fetch("https://verify.twilio.com/v2/Services/VAeb48e601487df1927db9c03860990d84/Verifications", requestOptions);
         if (!response.ok) {
-            throw new error_handler_middleware_1.AppError("Failed to send OTP via SMS", 500);
+            console.error(`Failed to send OTP via SMS to +91${phoneNumber}`);
         }
-        console.log(`OTP sent to +91${phoneNumber} via SMS`);
+        else {
+            console.log(`OTP sent to +91${phoneNumber} via SMS`);
+        }
     }
     catch (error) {
-        if (error instanceof error_handler_middleware_1.AppError) {
-            throw error;
-        }
-        throw new error_handler_middleware_1.AppError("Error sending OTP", 500);
+        console.error("Error sending OTP:", error);
     }
     return otp;
 };
