@@ -5,16 +5,22 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploadFile = exports.uploadPrescription = exports.uploadMiddleware = void 0;
 const multer_1 = __importDefault(require("multer"));
-const path_1 = __importDefault(require("path"));
+const cloudinary_1 = require("cloudinary");
+const multer_storage_cloudinary_1 = require("multer-storage-cloudinary");
 const error_handler_middleware_1 = require("./error-handler.middleware");
-// Configure storage
-const storage = multer_1.default.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, path_1.default.join(process.cwd(), "uploads", "prescriptions"));
-    },
-    filename: (req, file, cb) => {
-        const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, file.fieldname + "-" + uniqueSuffix + path_1.default.extname(file.originalname));
+// Configure Cloudinary
+cloudinary_1.v2.config({
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+// Configure Cloudinary storage
+const storage = new multer_storage_cloudinary_1.CloudinaryStorage({
+    cloudinary: cloudinary_1.v2,
+    params: {
+        folder: "prescriptions",
+        allowed_formats: ["jpg", "jpeg", "png", "pdf"],
+        resource_type: "auto",
     },
 });
 // File filter
@@ -28,9 +34,9 @@ const fileFilter = (req, file, cb) => {
         cb(new error_handler_middleware_1.AppError("Only image files and PDFs are allowed", 400));
     }
 };
-// Configure multer
+// Configure multer with memory storage
 exports.uploadMiddleware = (0, multer_1.default)({
-    storage,
+    storage: multer_1.default.memoryStorage(),
     fileFilter,
     limits: {
         fileSize: parseInt(process.env.MAX_FILE_SIZE || "5242880"), // 5MB default

@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { GoogleGenAI } from "@google/genai";
 import { AISummary } from "../models/AISummary.model";
-import { uploadToCloudinary } from "../utils/cloudinary";
-import fs from "fs";
 import { AppError } from "../middleware/error-handler.middleware";
 import * as pdfjs from "pdfjs-dist";
 import { User } from "../models/User.model";
+import axios from "axios";
+import { v2 as cloudinary } from "cloudinary";
 
 // Initialize Gemini
 const genAI = new GoogleGenAI({
@@ -17,10 +17,9 @@ const config = {
   responseMimeType: "text/plain",
 };
 
-// Helper function to convert PDF to base64
-async function convertPdfToBase64(filePath: string): Promise<string> {
-  const data = fs.readFileSync(filePath);
-  return data.toString("base64");
+// Helper function to convert buffer to base64
+function bufferToBase64(buffer: Buffer): string {
+  return buffer.toString("base64");
 }
 
 export const processPrescriptionImage = async (req: Request, res: Response) => {
@@ -29,8 +28,17 @@ export const processPrescriptionImage = async (req: Request, res: Response) => {
       throw new AppError("No file provided", 400);
     }
 
-    // Read file and convert to base64
-    const base64Data = await convertPdfToBase64(req.file.path);
+    // Upload to Cloudinary
+    const b64 = bufferToBase64(req.file.buffer);
+    const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+
+    const cloudinaryResponse = await cloudinary.uploader.upload(dataURI, {
+      folder: "prescriptions",
+      resource_type: "auto",
+    });
+
+    // Convert buffer to base64 for Gemini
+    const base64Data = bufferToBase64(req.file.buffer);
 
     // Process with Gemini
     const contents = [
@@ -93,21 +101,14 @@ export const processPrescriptionImage = async (req: Request, res: Response) => {
       warnings: extractedData.warnings,
       recommendations: extractedData.recommendations,
       confidence: extractedData.confidence,
+      cloudinaryUrl: cloudinaryResponse.secure_url, // Store the Cloudinary URL
     });
-
-    // Clean up: Delete the temporary file
-    fs.unlinkSync(req.file.path);
 
     return res.status(201).json({
       status: "success",
       data: aiSummary,
     });
   } catch (error) {
-    // Clean up: Delete the temporary file in case of error
-    if (req.file?.path) {
-      fs.unlinkSync(req.file.path);
-    }
-
     console.error("Error processing prescription:", error);
     throw error;
   }

@@ -1,14 +1,11 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.createManualSummary = exports.getAllPatientByDoctor = exports.getPatientSummaries = exports.deleteSummary = exports.updateSummary = exports.getUserSummaries = exports.getSummary = exports.getOverallSummary = exports.processPrescriptionImage = void 0;
 const genai_1 = require("@google/genai");
 const AISummary_model_1 = require("../models/AISummary.model");
-const fs_1 = __importDefault(require("fs"));
 const error_handler_middleware_1 = require("../middleware/error-handler.middleware");
 const User_model_1 = require("../models/User.model");
+const cloudinary_1 = require("cloudinary");
 // Initialize Gemini
 const genAI = new genai_1.GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY || "",
@@ -17,18 +14,24 @@ const model = "gemini-2.5-flash-preview-04-17";
 const config = {
     responseMimeType: "text/plain",
 };
-// Helper function to convert PDF to base64
-async function convertPdfToBase64(filePath) {
-    const data = fs_1.default.readFileSync(filePath);
-    return data.toString("base64");
+// Helper function to convert buffer to base64
+function bufferToBase64(buffer) {
+    return buffer.toString("base64");
 }
 const processPrescriptionImage = async (req, res) => {
     try {
         if (!req.file) {
             throw new error_handler_middleware_1.AppError("No file provided", 400);
         }
-        // Read file and convert to base64
-        const base64Data = await convertPdfToBase64(req.file.path);
+        // Upload to Cloudinary
+        const b64 = bufferToBase64(req.file.buffer);
+        const dataURI = `data:${req.file.mimetype};base64,${b64}`;
+        const cloudinaryResponse = await cloudinary_1.v2.uploader.upload(dataURI, {
+            folder: "prescriptions",
+            resource_type: "auto",
+        });
+        // Convert buffer to base64 for Gemini
+        const base64Data = bufferToBase64(req.file.buffer);
         // Process with Gemini
         const contents = [
             {
@@ -85,19 +88,14 @@ const processPrescriptionImage = async (req, res) => {
             warnings: extractedData.warnings,
             recommendations: extractedData.recommendations,
             confidence: extractedData.confidence,
+            cloudinaryUrl: cloudinaryResponse.secure_url, // Store the Cloudinary URL
         });
-        // Clean up: Delete the temporary file
-        fs_1.default.unlinkSync(req.file.path);
         return res.status(201).json({
             status: "success",
             data: aiSummary,
         });
     }
     catch (error) {
-        // Clean up: Delete the temporary file in case of error
-        if (req.file?.path) {
-            fs_1.default.unlinkSync(req.file.path);
-        }
         console.error("Error processing prescription:", error);
         throw error;
     }

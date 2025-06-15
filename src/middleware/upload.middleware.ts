@@ -1,19 +1,23 @@
 import multer from "multer";
-import path from "path";
+import { v2 as cloudinary } from "cloudinary";
+import { CloudinaryStorage } from "multer-storage-cloudinary";
 import { AppError } from "./error-handler.middleware";
 
-// Configure storage
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, path.join(process.cwd(), "uploads", "prescriptions"));
-  },
-  filename: (req, file, cb) => {
-    const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-    cb(
-      null,
-      file.fieldname + "-" + uniqueSuffix + path.extname(file.originalname)
-    );
-  },
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
+
+// Configure Cloudinary storage
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "prescriptions",
+    allowed_formats: ["jpg", "jpeg", "png", "pdf"],
+    resource_type: "auto",
+  } as any,
 });
 
 // File filter
@@ -33,9 +37,9 @@ const fileFilter = (
   }
 };
 
-// Configure multer
+// Configure multer with memory storage
 export const uploadMiddleware = multer({
-  storage,
+  storage: multer.memoryStorage(),
   fileFilter,
   limits: {
     fileSize: parseInt(process.env.MAX_FILE_SIZE || "5242880"), // 5MB default
