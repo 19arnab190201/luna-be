@@ -53,7 +53,7 @@ class AuthController {
       });
 
       // Generate and send OTP
-      const otp = await generateOTP(phoneNumber);
+      // const otp = await generateOTP(phoneNumber);
 
       res.status(201).json({
         status: "success",
@@ -86,7 +86,7 @@ class AuthController {
       }
 
       // Generate and send OTP
-      const otp = await generateOTP(phoneNumber);
+      // const otp = await generateOTP(phoneNumber);
 
       res.status(200).json({
         status: "success",
