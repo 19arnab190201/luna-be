@@ -383,7 +383,7 @@ export const createManualSummary = async (req: Request, res: Response) => {
 
     // Create AI summary with doctor as creator
     const aiSummary = await AISummary.create({
-      createdBy: req.user._id,
+      createdBy: patient._id,
       summary,
       keyMedications,
       dosages,

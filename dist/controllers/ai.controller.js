@@ -322,7 +322,7 @@ const createManualSummary = async (req, res) => {
         }
         // Create AI summary with doctor as creator
         const aiSummary = await AISummary_model_1.AISummary.create({
-            createdBy: req.user._id,
+            createdBy: patient._id,
             summary,
             keyMedications,
             dosages,
