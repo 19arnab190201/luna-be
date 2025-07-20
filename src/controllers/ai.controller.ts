@@ -19,7 +19,7 @@ const genAI = new GoogleGenAI({
   apiKey: process.env.GEMINI_API_KEY || "",
 });
 
-const model = "gemini-2.5-flash-preview-04-17";
+const model = process.env.GEMINI_MODEL || "gemini-2.0-flash-live-001";
 const config = {
   responseMimeType: "text/plain",
 };
@@ -149,7 +149,7 @@ export const getOverallSummary = async (req: Request, res: Response) => {
       apiKey: process.env.GEMINI_API_KEY || "",
     });
 
-    const model = "gemini-2.5-flash-preview-04-17";
+    const model = process.env.GEMINI_MODEL || "gemini-2.0-flash-live-001";
     const config = {
       responseMimeType: "text/plain",
     };
