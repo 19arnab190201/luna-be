@@ -16,7 +16,7 @@ cloudinary_1.v2.config({
 const genAI = new genai_1.GoogleGenAI({
     apiKey: process.env.GEMINI_API_KEY || "",
 });
-const model = "gemini-2.5-flash-preview-04-17";
+const model = process.env.GEMINI_MODEL || "gemini-2.0-flash-live-001";
 const config = {
     responseMimeType: "text/plain",
 };
@@ -129,7 +129,7 @@ const getOverallSummary = async (req, res) => {
         const genAI = new genai_1.GoogleGenAI({
             apiKey: process.env.GEMINI_API_KEY || "",
         });
-        const model = "gemini-2.5-flash-preview-04-17";
+        const model = process.env.GEMINI_MODEL || "gemini-2.0-flash-live-001";
         const config = {
             responseMimeType: "text/plain",
         };
